@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :objectives, only: [:index, :create, :show, :update, :destroy]
+      resources :overviews, only: [:index]
     end
   end
 end

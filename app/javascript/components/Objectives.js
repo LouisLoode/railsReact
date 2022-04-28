@@ -9,12 +9,18 @@ import Form from 'react-bootstrap/Form';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Stack from 'react-bootstrap/Stack';
 
+const VALIDATIONS_MESSAGES = {
+  weight_undefined: 'Weights are missing on some objective(s)',
+  sum_not_equal_to_hundred: 'You have some invalid weights !',
+};
+
 class Objectives extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
       objectives: [],
+      overviews: [],
 
       errors: [],
       isCreateFormOn: false,
@@ -28,10 +34,11 @@ class Objectives extends React.Component {
     };
 
     this.handleCreateObjective = this.handleCreateObjective.bind(this);
-    this.handleCreateClick = this.handleCreateClick.bind(this);
+    this.handleOpenCreateForm = this.handleOpenCreateForm.bind(this);
   }
 
   componentDidMount() {
+    this.loadOverviews();
     this.loadObjectives();
   }
 
@@ -74,13 +81,13 @@ class Objectives extends React.Component {
     }
   }
 
-  handleCreateClick() {
+  handleOpenCreateForm() {
     this.setState((state) => ({
       isCreateFormOn: !state.isCreateFormOn,
     }));
   }
 
-  handleChange(event) {
+  handleFormChange(event) {
     const fieldName = event.target.name;
     const fieldVal = event.target.value;
     const { form } = this.state;
@@ -103,18 +110,38 @@ class Objectives extends React.Component {
     }
   }
 
+  async loadOverviews() {
+    const overviewsUrl = 'api/v1/overviews';
+
+    const response = await fetch(overviewsUrl);
+    if (response.ok) {
+      const jsonData = await response.json();
+      if (jsonData) {
+        this.setState(() => ({
+          overviews: jsonData,
+        }));
+      }
+    }
+  }
+
   reloadObjectives() {
     this.setState({
       objectives: [],
+      overviews: [],
+      form: {
+        title: null,
+        weight: null,
+      },
       errors: [],
       isReady: false,
     });
+    this.loadOverviews();
     this.loadObjectives();
   }
 
   render() {
     const {
-      objectives, isReady, isCreateFormOn, errors,
+      objectives, overviews, isReady, isCreateFormOn, errors,
     } = this.state;
 
     if (!isReady) {
@@ -126,7 +153,7 @@ class Objectives extends React.Component {
       <>
         <Button
           variant="secondary"
-          onClick={this.handleCreateClick}
+          onClick={this.handleOpenCreateForm}
         >
           {!isCreateFormOn ? '+ Add obj.' : 'Cancel'}
         </Button>
@@ -156,13 +183,13 @@ class Objectives extends React.Component {
                 className="me-auto"
                 name="title"
                 placeholder="Add your title here..."
-                onChange={this.handleChange.bind(this)}
+                onChange={this.handleFormChange.bind(this)}
               />
               <Form.Control
                 className="me-auto"
                 name="weight"
                 placeholder="Add your weight here..."
-                onChange={this.handleChange.bind(this)}
+                onChange={this.handleFormChange.bind(this)}
               />
               <Button
                 variant="secondary"
@@ -181,12 +208,24 @@ class Objectives extends React.Component {
                 <div className="sm-2 me-auto">
                   <div className="fw-bold">{objective.attributes.title}</div>
                 </div>
-                <Badge bg="primary" pill>
+                <Badge bg="secondary" text="light">
                   {objective.attributes.weight}
+                  {' '}
+                  %
                 </Badge>
               </ListGroup.Item>
             ))}
           </ListGroup>
+
+          {overviews && overviews.length > 0 && (
+          <Alert variant="warning">
+            <ul>
+              {overviews.map((overview) => (
+                <li key={overview}>{VALIDATIONS_MESSAGES[overview]}</li>
+              ))}
+            </ul>
+          </Alert>
+          )}
         </Stack>
       </>
     );
