@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Objective < ApplicationRecord
   validates :title, presence: true
   validates :weight, numericality: {

@@ -1,15 +1,17 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 # Change this ObjectivesController to your project
 RSpec.describe Api::V1::ObjectivesController, type: :controller do
   describe 'GET #index' do
-    let!(:objective) { create(:objective) }
+    let(:objective) { create(:objective) }
 
     it 'returns a success response' do
       get :index, params: {}
 
       expect(response).to be_successful
-      expect(response).to have_http_status(200)
+      expect(response).to have_http_status(:ok)
     end
   end
 
@@ -22,7 +24,7 @@ RSpec.describe Api::V1::ObjectivesController, type: :controller do
       }
 
       expect(response).to be_successful
-      expect(response).to have_http_status(200)
+      expect(response).to have_http_status(:ok)
     end
 
     it 'returns a not found error response' do
@@ -32,7 +34,7 @@ RSpec.describe Api::V1::ObjectivesController, type: :controller do
 
       body = JSON.parse(response.body)
 
-      expect(response).to have_http_status(404)
+      expect(response).to have_http_status(:not_found)
       expect(body['code']).to eq(404)
       expect(body['error']).to eq('Record Not Found')
     end
@@ -69,7 +71,7 @@ RSpec.describe Api::V1::ObjectivesController, type: :controller do
       post :create, params: {
         objective: {
           title: nil,
-          weight: 'invalid',
+          weight: 'invalid'
         }
       }
 
@@ -79,7 +81,7 @@ RSpec.describe Api::V1::ObjectivesController, type: :controller do
       json = JSON.parse(response.body)
 
       expect(json['title']).to eq(["can't be blank"])
-      expect(json['weight']).to eq(["is not a number"])
+      expect(json['weight']).to eq(['is not a number'])
 
       expect(Objective.count).to eq(0)
     end
@@ -118,12 +120,12 @@ RSpec.describe Api::V1::ObjectivesController, type: :controller do
       put :update, params: {
         id: 'UNKNOWN',
         title: 'TITLE UPDATE',
-        weight: 55,
+        weight: 55
       }
 
       body = JSON.parse(response.body)
 
-      expect(response).to have_http_status(404)
+      expect(response).to have_http_status(:not_found)
       expect(body['code']).to eq(404)
       expect(body['error']).to eq('Record Not Found')
     end
@@ -151,7 +153,7 @@ RSpec.describe Api::V1::ObjectivesController, type: :controller do
 
       body = JSON.parse(response.body)
 
-      expect(response).to have_http_status(404)
+      expect(response).to have_http_status(:not_found)
       expect(body['code']).to eq(404)
       expect(body['error']).to eq('Record Not Found')
     end
