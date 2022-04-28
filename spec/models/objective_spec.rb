@@ -13,9 +13,9 @@ RSpec.describe Objective, :type => :model do
     expect(subject).to_not be_valid
   end
 
-  it "is not valid without a weight" do
+  it "is valid without a weight" do
     subject.weight = nil
-    expect(subject).to_not be_valid
+    expect(subject).to be_valid
   end
 
   it "is not valid with a weight bigger than 100" do
