@@ -9,6 +9,8 @@ import Form from 'react-bootstrap/Form';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Stack from 'react-bootstrap/Stack';
 
+import { Trash } from 'react-bootstrap-icons';
+
 const VALIDATIONS_MESSAGES = {
   weight_undefined: 'Weights are missing on some objective(s)',
   sum_not_equal_to_hundred: 'You have some invalid weights !',
@@ -95,6 +97,17 @@ class Objectives extends React.Component {
     this.setState({ form: { ...form, [fieldName]: fieldVal } });
   }
 
+  async deleteObjective(id) {
+    const objectiveUrl = `api/v1/objectives/${id}`;
+
+    const response = await fetch(objectiveUrl, {
+      method: 'delete',
+    });
+    if (response.ok) {
+      this.reloadObjectives();
+    }
+  }
+
   async loadObjectives() {
     const objectivesUrl = 'api/v1/objectives';
 
@@ -177,16 +190,14 @@ class Objectives extends React.Component {
             {isCreateFormOn && (
             <ListGroup.Item
               key="new"
-              className="d-flex justify-content-between align-items-start"
+              className="d-flex justify-content-between"
             >
               <Form.Control
-                className="me-auto"
                 name="title"
                 placeholder="Add your title here..."
                 onChange={this.handleFormChange.bind(this)}
               />
               <Form.Control
-                className="me-auto"
                 name="weight"
                 placeholder="Add your weight here..."
                 onChange={this.handleFormChange.bind(this)}
@@ -205,14 +216,17 @@ class Objectives extends React.Component {
                 key={objective.id}
                 className="d-flex justify-content-between align-items-start"
               >
-                <div className="sm-2 me-auto">
+                <div>
                   <div className="fw-bold">{objective.attributes.title}</div>
                 </div>
-                <Badge bg="secondary" text="light">
-                  {objective.attributes.weight}
-                  {' '}
-                  %
-                </Badge>
+                {objective.attributes.weight && (
+                  <Badge bg="secondary" text="light">
+                    {objective.attributes.weight}
+                    {' '}
+                    %
+                  </Badge>
+                )}
+                <Trash onClick={() => this.deleteObjective(objective.id)} />
               </ListGroup.Item>
             ))}
           </ListGroup>
