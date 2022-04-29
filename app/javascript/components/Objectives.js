@@ -26,6 +26,7 @@ class Objectives extends React.Component {
 
       errors: [],
       isCreateFormOn: false,
+      updateFormOnId: null,
 
       form: {
         title: null,
@@ -36,6 +37,7 @@ class Objectives extends React.Component {
     };
 
     this.handleCreateObjective = this.handleCreateObjective.bind(this);
+    this.handleUpdateObjective = this.handleUpdateObjective.bind(this);
     this.handleOpenCreateForm = this.handleOpenCreateForm.bind(this);
   }
 
@@ -59,6 +61,38 @@ class Objectives extends React.Component {
           weight,
         },
       }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      if (errorData) {
+        const errorsTransformed = transform(errorData, (result, value, key) => {
+          value.forEach((error) => {
+            result.push(`${key} ${error}`);
+          });
+        }, []);
+
+        this.setState({ errors: errorsTransformed });
+      }
+    } else if (response.ok) {
+      const jsonData = await response.json();
+      if (jsonData) {
+        this.refreshData();
+      }
+    }
+  }
+
+  async handleUpdateObjective() {
+    const { form, updateFormOnId } = this.state;
+
+    const updateObjectivesUrl = `api/v1/objectives/${updateFormOnId}`;
+
+    const response = await fetch(updateObjectivesUrl, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ objective: form }),
     });
 
     if (!response.ok) {
@@ -154,14 +188,87 @@ class Objectives extends React.Component {
       errors: [],
       isCreateFormOn: false,
       isReady: false,
+      updateFormOnId: null,
     });
     this.loadData();
   }
 
   render() {
     const {
-      objectives, overviews, isReady, isCreateFormOn, errors,
+      objectives, overviews, isReady, isCreateFormOn, errors, updateFormOnId,
     } = this.state;
+
+    const renderObjectiveLine = (objective) => {
+      if (updateFormOnId === objective.id) {
+        return (
+          <>
+            <Form.Control
+              name="title"
+              defaultValue={this.state.form.title}
+              onChange={this.handleFormChange.bind(this)}
+            />
+            <Form.Control
+              name="weight"
+              defaultValue={this.state.form.weight}
+              onChange={this.handleFormChange.bind(this)}
+            />
+            <Button
+              variant="secondary"
+              onClick={this.handleUpdateObjective}
+            >
+              Update
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                this.setState({ updateFormOnId: null });
+              }}
+            >
+              Cancel
+            </Button>
+          </>
+        );
+      }
+      return (
+        <>
+          <div
+            onClick={() => {
+              this.setState((prevState) => ({
+                updateFormOnId: objective.id,
+                form: {
+                  ...prevState.form,
+                  title: objective.attributes.title,
+                  weight: objective.attributes.weight,
+                },
+              }));
+            }}
+          >
+            {objective.attributes.title}
+          </div>
+          {objective.attributes.weight && (
+            <Badge
+              bg="secondary"
+              text="light"
+              onClick={() => {
+                this.setState((prevState) => ({
+                  updateFormOnId: objective.id,
+                  form: {
+                    ...prevState.form,
+                    title: objective.attributes.title,
+                    weight: objective.attributes.weight,
+                  },
+                }));
+              }}
+            >
+              {objective.attributes.weight}
+              {' '}
+              %
+            </Badge>
+          )}
+          <Trash onClick={() => this.deleteObjective(objective.id)} />
+        </>
+      );
+    };
 
     if (!isReady) {
       return (
@@ -222,17 +329,7 @@ class Objectives extends React.Component {
                 key={objective.id}
                 className="d-flex justify-content-between align-items-start"
               >
-                <div>
-                  <div className="fw-bold">{objective.attributes.title}</div>
-                </div>
-                {objective.attributes.weight && (
-                  <Badge bg="secondary" text="light">
-                    {objective.attributes.weight}
-                    {' '}
-                    %
-                  </Badge>
-                )}
-                <Trash onClick={() => this.deleteObjective(objective.id)} />
+                {renderObjectiveLine(objective)}
               </ListGroup.Item>
             ))}
           </ListGroup>
