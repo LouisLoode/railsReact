@@ -40,8 +40,7 @@ class Objectives extends React.Component {
   }
 
   componentDidMount() {
-    this.loadOverviews();
-    this.loadObjectives();
+    this.loadData();
   }
 
   async handleCreateObjective() {
@@ -49,19 +48,17 @@ class Objectives extends React.Component {
     const { form } = this.state;
     const { title, weight } = form;
 
-    const payload = JSON.stringify({
-      objective: {
-        title,
-        weight,
-      },
-    });
-
     const response = await fetch(createObjectivesUrl, {
       method: 'post',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: payload,
+      body: JSON.stringify({
+        objective: {
+          title,
+          weight,
+        },
+      }),
     });
 
     if (!response.ok) {
@@ -78,7 +75,7 @@ class Objectives extends React.Component {
     } else if (response.ok) {
       const jsonData = await response.json();
       if (jsonData) {
-        this.reloadObjectives();
+        this.refreshData();
       }
     }
   }
@@ -103,9 +100,13 @@ class Objectives extends React.Component {
     const response = await fetch(objectiveUrl, {
       method: 'delete',
     });
-    if (response.ok) {
-      this.reloadObjectives();
+
+    if (!response.ok) {
+      const message = `An error has occured: ${response.status}`;
+      throw new Error(message);
     }
+
+    this.refreshData();
   }
 
   async loadObjectives() {
@@ -137,7 +138,12 @@ class Objectives extends React.Component {
     }
   }
 
-  reloadObjectives() {
+  loadData() {
+    this.loadOverviews();
+    this.loadObjectives();
+  }
+
+  refreshData() {
     this.setState({
       objectives: [],
       overviews: [],
@@ -146,10 +152,10 @@ class Objectives extends React.Component {
         weight: null,
       },
       errors: [],
+      isCreateFormOn: false,
       isReady: false,
     });
-    this.loadOverviews();
-    this.loadObjectives();
+    this.loadData();
   }
 
   render() {
