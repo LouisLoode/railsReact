@@ -28,6 +28,9 @@ class Objectives extends React.Component {
       isCreateFormOn: false,
       updateFormOnId: null,
 
+      fastUpdateWeight: null,
+      fastUpdateWeightId: null,
+
       form: {
         title: null,
         weight: null,
@@ -83,16 +86,25 @@ class Objectives extends React.Component {
   }
 
   async handleUpdateObjective() {
-    const { form, updateFormOnId } = this.state;
+    const {
+      form, updateFormOnId, fastUpdateWeightId, fastUpdateWeight,
+    } = this.state;
+    const id = fastUpdateWeightId || updateFormOnId;
+    const weight = fastUpdateWeight || form.weight;
 
-    const updateObjectivesUrl = `api/v1/objectives/${updateFormOnId}`;
-
+    const updateObjectivesUrl = `api/v1/objectives/${id}`;
     const response = await fetch(updateObjectivesUrl, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ objective: form }),
+      body: JSON.stringify({
+        objective: {
+          ...form,
+          weight,
+        },
+
+      }),
     });
 
     if (!response.ok) {
@@ -125,7 +137,11 @@ class Objectives extends React.Component {
     const fieldVal = event.target.value;
     const { form } = this.state;
 
-    this.setState({ form: { ...form, [fieldName]: fieldVal } });
+    if (fieldName === 'fastUpdateWeight') {
+      this.setState({ fastUpdateWeight: fieldVal });
+    } else {
+      this.setState({ form: { ...form, [fieldName]: fieldVal } });
+    }
   }
 
   async deleteObjective(id) {
@@ -189,13 +205,31 @@ class Objectives extends React.Component {
       isCreateFormOn: false,
       isReady: false,
       updateFormOnId: null,
+      fastUpdateWeightId: null,
+      fastUpdateWeight: null,
     });
     this.loadData();
   }
 
+  handleKeyDown(event) {
+    const { fastUpdateWeightId, updateFormOnId } = this.state;
+    if (event.key === 'Enter') {
+      if (fastUpdateWeightId || updateFormOnId) {
+        this.handleUpdateObjective();
+      } else {
+        this.handleCreateObjective();
+      }
+    }
+  }
+
   render() {
     const {
-      objectives, overviews, isReady, isCreateFormOn, errors, updateFormOnId,
+      objectives,
+      overviews,
+      errors,
+      isReady,
+      isCreateFormOn,
+      updateFormOnId,
     } = this.state;
 
     const renderObjectiveLine = (objective) => {
@@ -206,11 +240,13 @@ class Objectives extends React.Component {
               name="title"
               defaultValue={this.state.form.title}
               onChange={this.handleFormChange.bind(this)}
+              onKeyDown={this.handleKeyDown.bind(this)}
             />
             <Form.Control
               name="weight"
               defaultValue={this.state.form.weight}
               onChange={this.handleFormChange.bind(this)}
+              onKeyDown={this.handleKeyDown.bind(this)}
             />
             <Button
               variant="secondary"
@@ -245,13 +281,14 @@ class Objectives extends React.Component {
           >
             {objective.attributes.title}
           </div>
-          {objective.attributes.weight && (
+          {objective.attributes.weight ? (
             <Badge
               bg="secondary"
               text="light"
               onClick={() => {
                 this.setState((prevState) => ({
                   updateFormOnId: objective.id,
+                  fastUpdateWeightId: null,
                   form: {
                     ...prevState.form,
                     title: objective.attributes.title,
@@ -264,6 +301,24 @@ class Objectives extends React.Component {
               {' '}
               %
             </Badge>
+          ) : (
+            <Form.Control
+              name="fastUpdateWeight"
+              defaultValue={this.state.fastUpdateWeight}
+              onChange={this.handleFormChange.bind(this)}
+              size="sm"
+              style={{ width: '10%' }}
+              onClick={() => {
+                this.setState((prevState) => ({
+                  fastUpdateWeightId: objective.id,
+                  form: {
+                    ...prevState.form,
+                    title: objective.attributes.title,
+                  },
+                }));
+              }}
+              onKeyDown={this.handleKeyDown.bind(this)}
+            />
           )}
           <Trash onClick={() => this.deleteObjective(objective.id)} />
         </>
@@ -308,6 +363,7 @@ class Objectives extends React.Component {
               <Form.Control
                 name="title"
                 placeholder="Add your title here..."
+                onKeyDown={this.handleKeyDown.bind(this)}
                 onChange={this.handleFormChange.bind(this)}
               />
               <Form.Control
