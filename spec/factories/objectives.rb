@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :objective do
-    title { 'MyAwesomeTitle' }
+    title { Faker::DcComics.title }
     weight { rand(1..100) }
   end
 end

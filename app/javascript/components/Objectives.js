@@ -8,6 +8,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Stack from 'react-bootstrap/Stack';
+import Spinner from 'react-bootstrap/Spinner';
 
 import { Trash } from 'react-bootstrap-icons';
 
@@ -267,7 +268,7 @@ class Objectives extends React.Component {
       }
       return (
         <>
-          <div
+          <span
             onClick={() => {
               this.setState((prevState) => ({
                 updateFormOnId: objective.id,
@@ -280,7 +281,7 @@ class Objectives extends React.Component {
             }}
           >
             {objective.attributes.title}
-          </div>
+          </span>
           {objective.attributes.weight ? (
             <Badge
               bg="secondary"
@@ -320,14 +321,14 @@ class Objectives extends React.Component {
               onKeyDown={this.handleKeyDown.bind(this)}
             />
           )}
-          <Trash onClick={() => this.deleteObjective(objective.id)} />
+          <Trash id="delete" onClick={() => this.deleteObjective(objective.id)} />
         </>
       );
     };
 
     if (!isReady) {
       return (
-        <b>Data loading</b>
+        <Spinner animation="border" />
       );
     }
     return (
@@ -350,7 +351,7 @@ class Objectives extends React.Component {
           </Alert>
           )}
           {objectives.length === 0 && !isCreateFormOn && (
-          <Alert variant="primary">
+          <Alert variant="primary" id="empty-list">
             No objective yet :(
           </Alert>
           )}
@@ -358,6 +359,7 @@ class Objectives extends React.Component {
             {isCreateFormOn && (
             <ListGroup.Item
               key="new"
+              id="new-objective-form"
               className="d-flex justify-content-between"
             >
               <Form.Control
@@ -383,6 +385,7 @@ class Objectives extends React.Component {
             {objectives.map((objective) => (
               <ListGroup.Item
                 key={objective.id}
+                id="objective-line"
                 className="d-flex justify-content-between align-items-start"
               >
                 {renderObjectiveLine(objective)}
