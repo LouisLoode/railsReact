@@ -371,6 +371,7 @@ class Objectives extends React.Component {
               <Form.Control
                 name="weight"
                 placeholder="Add your weight here..."
+                onKeyDown={this.handleKeyDown.bind(this)}
                 onChange={this.handleFormChange.bind(this)}
               />
               <Button
