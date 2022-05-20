@@ -2,13 +2,12 @@
 // - Objectives (fetch, list, display errors)
 // - - Objective (save)
 // - - - Form
-// - - InfoBox (info type, message)
+// - - InfoBox (info type, message) -> Done
 
 import React from 'react';
 
 import transform from 'lodash/transform';
 
-import Alert from 'react-bootstrap/Alert';
 import Badge from 'react-bootstrap/Badge';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -17,6 +16,7 @@ import Stack from 'react-bootstrap/Stack';
 import Spinner from 'react-bootstrap/Spinner';
 
 import { Trash } from 'react-bootstrap-icons';
+import ObjectiveForm from './ObjectiveForm';
 
 import InfoBox from './InfoBox';
 
@@ -244,37 +244,17 @@ class Objectives extends React.Component {
     } = this.state;
 
     const renderObjectiveLine = (objective) => {
-      // Form
+      // Form(objective, onSubmit, onCancel)
       if (updateFormOnId === objective.id) {
         return (
-          <>
-            <Form.Control
-              name="title"
-              defaultValue={form.title}
-              onChange={this.handleFormChange.bind(this)}
-              onKeyDown={this.handleKeyDown.bind(this)}
-            />
-            <Form.Control
-              name="weight"
-              defaultValue={form.weight}
-              onChange={this.handleFormChange.bind(this)}
-              onKeyDown={this.handleKeyDown.bind(this)}
-            />
-            <Button
-              variant="secondary"
-              onClick={this.handleUpdateObjective}
-            >
-              Update
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                this.setState({ updateFormOnId: null });
-              }}
-            >
-              Cancel
-            </Button>
-          </>
+          <ObjectiveForm
+            objective={objective}
+            onChange={this.handleFormChange.bind(this)}
+            onSubmit={this.handleUpdateObjective}
+            onCancel={() => {
+              this.setState({ updateFormOnId: null });
+            }}
+          />
         );
       }
 
@@ -349,8 +329,9 @@ class Objectives extends React.Component {
         <Button
           variant="secondary"
           onClick={this.handleOpenCreateForm}
+          disabled={isCreateFormOn}
         >
-          {!isCreateFormOn ? '+ Add obj.' : 'Cancel'}
+          + Add Obj.
         </Button>
 
         <Stack className="col-lg-8 mx-auto">
