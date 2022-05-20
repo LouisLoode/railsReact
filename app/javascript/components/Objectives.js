@@ -145,6 +145,17 @@ class Objectives extends React.Component {
     }
   }
 
+  handleKeyDown(event) {
+    const { fastUpdateWeightId, updateFormOnId } = this.state;
+    if (event.key === 'Enter') {
+      if (fastUpdateWeightId || updateFormOnId) {
+        this.handleUpdateObjective();
+      } else {
+        this.handleCreateObjective();
+      }
+    }
+  }
+
   async deleteObjective(id) {
     const objectiveUrl = `api/v1/objectives/${id}`;
 
@@ -212,17 +223,6 @@ class Objectives extends React.Component {
     this.loadData();
   }
 
-  handleKeyDown(event) {
-    const { fastUpdateWeightId, updateFormOnId } = this.state;
-    if (event.key === 'Enter') {
-      if (fastUpdateWeightId || updateFormOnId) {
-        this.handleUpdateObjective();
-      } else {
-        this.handleCreateObjective();
-      }
-    }
-  }
-
   render() {
     const {
       objectives,
@@ -231,6 +231,8 @@ class Objectives extends React.Component {
       isReady,
       isCreateFormOn,
       updateFormOnId,
+      form,
+      fastUpdateWeight,
     } = this.state;
 
     const renderObjectiveLine = (objective) => {
@@ -239,13 +241,13 @@ class Objectives extends React.Component {
           <>
             <Form.Control
               name="title"
-              defaultValue={this.state.form.title}
+              defaultValue={form.title}
               onChange={this.handleFormChange.bind(this)}
               onKeyDown={this.handleKeyDown.bind(this)}
             />
             <Form.Control
               name="weight"
-              defaultValue={this.state.form.weight}
+              defaultValue={form.weight}
               onChange={this.handleFormChange.bind(this)}
               onKeyDown={this.handleKeyDown.bind(this)}
             />
@@ -305,7 +307,7 @@ class Objectives extends React.Component {
           ) : (
             <Form.Control
               name="fastUpdateWeight"
-              defaultValue={this.state.fastUpdateWeight}
+              defaultValue={fastUpdateWeight}
               onChange={this.handleFormChange.bind(this)}
               size="sm"
               style={{ width: '10%' }}
