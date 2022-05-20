@@ -1,3 +1,9 @@
+// App
+// - Objectives (fetch, list, display errors)
+// - - Objective (save)
+// - - - Form
+// - - InfoBox (info type, message)
+
 import React from 'react';
 
 import transform from 'lodash/transform';
@@ -11,6 +17,8 @@ import Stack from 'react-bootstrap/Stack';
 import Spinner from 'react-bootstrap/Spinner';
 
 import { Trash } from 'react-bootstrap-icons';
+
+import InfoBox from './InfoBox';
 
 const VALIDATIONS_MESSAGES = {
   weight_undefined: 'Weights are missing on some objective(s)',
@@ -236,6 +244,7 @@ class Objectives extends React.Component {
     } = this.state;
 
     const renderObjectiveLine = (objective) => {
+      // Form
       if (updateFormOnId === objective.id) {
         return (
           <>
@@ -268,6 +277,8 @@ class Objectives extends React.Component {
           </>
         );
       }
+
+      // - Objective
       return (
         <>
           <span
@@ -343,21 +354,15 @@ class Objectives extends React.Component {
         </Button>
 
         <Stack className="col-lg-8 mx-auto">
+
           {errors.length > 0 && (
-          <Alert variant="danger">
-            <ul>
-              {errors.map((error) => (
-                <li key={error}>{error}</li>
-              ))}
-            </ul>
-          </Alert>
+            <InfoBox type="danger" items={errors} />
           )}
           {objectives.length === 0 && !isCreateFormOn && (
-          <Alert variant="primary" id="empty-list">
-            No objective yet :(
-          </Alert>
+            <InfoBox type="primary" items={['No objective yet :(']} />
           )}
           <ListGroup>
+            {/* Form */}
             {isCreateFormOn && (
             <ListGroup.Item
               key="new"
@@ -385,6 +390,7 @@ class Objectives extends React.Component {
             </ListGroup.Item>
             )}
 
+            { /* Objectives */ }
             {objectives.map((objective) => (
               <ListGroup.Item
                 key={objective.id}
@@ -396,14 +402,9 @@ class Objectives extends React.Component {
             ))}
           </ListGroup>
 
+          { /* InfoBox(type=warning) */ }
           {overviews && overviews.length > 0 && (
-          <Alert variant="warning">
-            <ul>
-              {overviews.map((overview) => (
-                <li key={overview}>{VALIDATIONS_MESSAGES[overview]}</li>
-              ))}
-            </ul>
-          </Alert>
+            <InfoBox type="warning" items={overviews.map((overview) => VALIDATIONS_MESSAGES[overview])} />
           )}
         </Stack>
       </>
