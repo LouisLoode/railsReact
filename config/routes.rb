@@ -3,5 +3,10 @@
 Rails.application.routes.draw do
   root to: 'site#index'
 
-  get '*path', to: 'site#index', via: :all
+  namespace :api do
+    namespace :v1 do
+      resources :objectives, only: [:index, :create, :show, :update, :destroy]
+      resources :overviews, only: [:index]
+    end
+  end
 end

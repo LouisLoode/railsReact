@@ -1,4 +1,16 @@
 import React from 'react';
 
-const App = () => <h1>Hello, App!</h1>;
+import { Container, Row, Col } from 'react-bootstrap';
+
+import Objectives from './Objectives';
+
+const App = () => (
+  <Container>
+    <Row>
+      <Col>
+        <Objectives />
+      </Col>
+    </Row>
+  </Container>
+);
 export default App;
